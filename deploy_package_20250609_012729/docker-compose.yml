@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  # 开发模式前端服务 - 支持热重载
+  frontend-dev:
+    image: node:18
+    container_name: ai-tools-dev
+    working_dir: /app
+    ports:
+      - "5178:5178"
+    volumes:
+      # 挂载源代码，支持热重载
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: >
+      sh -c "
+        if [ ! -d node_modules ]; then
+          echo '📦 安装依赖...';
+          npm install;
+        fi &&
+        echo '🚀 启动开发服务器...' &&
+        npm run dev -- --host 0.0.0.0 --port 5178
+      "
+    networks:
+      - app-network
+
+  # 复用现有的md_note容器
+  md_note:
+    image: md-note-manager:latest
+    container_name: md-note-service
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

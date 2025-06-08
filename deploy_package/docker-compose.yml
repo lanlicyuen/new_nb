@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    container_name: 1plab-os-frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped

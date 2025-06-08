@@ -1,0 +1,428 @@
+/* 集成应用的样式表 - 整合MD Note和AI Tools Manager - CYBER•MD */
+
+/* 基础样式 */
+:root {
+  --cyber-blue: #00f5ff;
+  --cyber-purple: #bd00ff;
+  --cyber-pink: #ff0080;
+  --cyber-green: #00ff41;
+  --cyber-yellow: #ffee00;
+  --bg-dark: #0a0a1a;
+  --bg-darker: #050512;
+  --bg-light: #1f1f3f;
+  --text-light: #eaeaff;
+  --text-dim: #9b9bbb;
+  --border-glow: 0 0 10px var(--cyber-blue);
+}
+
+/* Tailwind CSS 自定义类 */
+.cyber-blue { color: var(--cyber-blue); }
+.cyber-purple { color: var(--cyber-purple); }
+.cyber-pink { color: var(--cyber-pink); }
+.cyber-green { color: var(--cyber-green); }
+
+.bg-cyber-blue { background-color: var(--cyber-blue); }
+.bg-cyber-purple { background-color: var(--cyber-purple); }
+.bg-cyber-pink { background-color: var(--cyber-pink); }
+.bg-cyber-green { background-color: var(--cyber-green); }
+
+.from-cyber-blue { --tw-gradient-from: var(--cyber-blue); }
+.to-cyber-purple { --tw-gradient-to: var(--cyber-purple); }
+.to-cyber-pink { --tw-gradient-to: var(--cyber-pink); }
+.via-cyber-purple { --tw-gradient-via-color: var(--cyber-purple); }
+
+/* 玻璃态效果 */
+.glassmorphism {
+  background: rgba(15, 15, 30, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+body {
+  margin: 0;
+  font-family: 'Rajdhani', 'Segoe UI', 'Roboto', sans-serif;
+  color: var(--text-light);
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(28, 28, 50, 0.8) 0%, rgba(10, 10, 26, 0.4) 70%),
+    linear-gradient(0deg, var(--bg-darker), transparent),
+    repeating-linear-gradient(45deg, rgba(0, 245, 255, 0.05), rgba(0, 245, 255, 0.05) 1px, transparent 1px, transparent 10px);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* 赛博朋克文本效果 */
+.cyberpunk-text {
+  font-family: 'Rajdhani', 'Blender Pro', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+/* 霓虹灯发光效果 */
+.glow-text {
+  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+.glow-text-sm {
+  text-shadow: 0 0 2px currentColor, 0 0 5px currentColor;
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.6);
+}
+
+.shadow-glow-purple {
+  box-shadow: 0 0 15px rgba(189, 0, 255, 0.6);
+}
+
+.shadow-glow-sm {
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
+}
+
+/* 全局布局 */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem 5%;
+  margin-top: 60px;
+}
+
+/* 导航栏 */
+.cyber-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 0 1.5rem;
+  background-color: rgba(5, 5, 18, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--cyber-blue);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cyber-blue);
+  font-weight: bold;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+}
+
+.logo svg {
+  filter: drop-shadow(0 0 2px var(--cyber-blue));
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.tab-button:hover {
+  color: var(--text-light);
+}
+
+.tab-button.active {
+  color: var(--cyber-blue);
+}
+
+.tab-button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--cyber-blue);
+  box-shadow: 0 0 8px var(--cyber-blue);
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.username {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--cyber-green);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 0, 80, 0.2);
+  color: var(--text-light);
+  border: 1px solid var(--cyber-pink);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255, 0, 80, 0.4);
+  box-shadow: 0 0 12px rgba(255, 0, 80, 0.6);
+}
+
+/* 登录表单 */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 50% 30%, rgba(189, 0, 255, 0.15) 0%, transparent 70%),
+    radial-gradient(circle at 80% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 60%);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background-color: rgba(15, 15, 35, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+  animation: cardPulse 3s infinite alternate;
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+  text-align: center;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--cyber-blue);
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: rgba(5, 5, 18, 0.6);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 4px;
+  color: var(--text-light);
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--cyber-blue);
+  box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.2);
+}
+
+.error-message {
+  background-color: rgba(255, 0, 80, 0.2);
+  border: 1px solid var(--cyber-pink);
+  color: var(--text-light);
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+/* 按钮 */
+.cyber-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(0, 245, 255, 0.1) 100%);
+  color: var(--cyber-blue);
+  border: 1px solid var(--cyber-blue);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.cyber-button:hover::before {
+  left: 100%;
+}
+
+.cyber-button:hover {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.3) 0%, rgba(0, 245, 255, 0.2) 100%);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.add-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyber-blue) 0%, var(--cyber-purple) 100%);
+  color: var(--text-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
+  transition: all 0.3s ease;
+  z-index: 90;
+}
+
+.add-button:hover {
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* 加载器 */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.cyber-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid transparent;
+  border-top-color: var(--cyber-blue);
+  border-right-color: var(--cyber-purple);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: relative;
+}
+
+.cyber-spinner::before,
+.cyber-spinner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.cyber-spinner::before {
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 3px solid transparent;
+  border-bottom-color: var(--cyber-pink);
+  border-left-color: var(--cyber-green);
+  animation: spin 0.8s linear infinite reverse;
+}
+
+/* 动画 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes cardPulse {
+  0% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.2); }
+  100% { box-shadow: 0 0 30px rgba(0, 245, 255, 0.4); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .cyber-nav {
+    flex-direction: column;
+    height: auto;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .logo {
+    margin-top: 0.5rem;
+  }
+  
+  .tabs {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .user-actions {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .main-content {
+    margin-top: 150px;
+    padding: 1rem;
+  }
+  
+  .add-button {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}

@@ -1,20 +1,4 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-export function calculateExpirationDate(purchaseDate: string, feeType: 'monthly' | 'yearly'): string {
-  const date = new Date(purchaseDate);
-  if (feeType === 'yearly') {
-    date.setFullYear(date.getFullYear() + 1);
-  } else {
-    date.setMonth(date.getMonth() + 1);
-  }
-  return date.toISOString().split('T')[0];
-}
-
+// Simple utils without external dependencies
 export function isExpiringSoon(expirationDate: string, daysThreshold: number = 7): boolean {
   const expiry = new Date(expirationDate);
   const today = new Date();
@@ -55,8 +39,8 @@ export function saveToLocalStorage(key: string, data: any): void {
 
 export function loadFromLocalStorage<T>(key: string, defaultValue: T): T {
   try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : defaultValue;
   } catch (error) {
     console.error('Failed to load from localStorage:', error);
     return defaultValue;
@@ -64,5 +48,5 @@ export function loadFromLocalStorage<T>(key: string, defaultValue: T): T {
 }
 
 export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9);
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }

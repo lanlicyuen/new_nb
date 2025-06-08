@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-cyber-blue: #00f5ff;
+  --color-cyber-purple: #bd00ff;
+  --color-cyber-pink: #ff0080;
+  --color-cyber-green: #00ff41;
+  --color-cyber-dark: #0a0a0a;
+  --color-cyber-darker: #050505;
+  --color-cyber-gray: #1a1a1a;
+  
+  --font-family-cyber: Inter, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-cyber-darker);
+  color: white;
+  font-family: var(--font-family-cyber);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl;
+  }
+  
+  .neon-border {
+    @apply border border-cyber-blue/50;
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .cyber-button {
+    @apply px-6 py-3 bg-gradient-to-r from-cyber-blue/20 to-cyber-purple/20 
+           border border-cyber-blue/50 rounded-lg text-cyber-blue font-medium
+           transition-all duration-300 hover:from-cyber-blue/30 hover:to-cyber-purple/30
+           hover:border-cyber-blue hover:shadow-lg hover:shadow-cyber-blue/30;
+  }
+  
+  .cyber-input {
+    @apply bg-cyber-gray/50 border border-cyber-blue/30 rounded-lg px-4 py-3
+           text-white placeholder-gray-400 focus:outline-none focus:border-cyber-blue
+           focus:shadow-lg focus:shadow-cyber-blue/20 transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #00f5ff, #bd00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .animated-bg {
+    background: linear-gradient(-45deg, #0a0a0a, #1a1a1a, #0f0f0f, #151515);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00f5ff, #bd00ff);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00d4e6, #a000e6);
+}
