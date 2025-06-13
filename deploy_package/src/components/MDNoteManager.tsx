@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { FileText, Plus, Folder, Search, Edit3, Trash2, Save, X, FolderPlus, Calendar, Hash, Zap, Star, Code } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { postgresAPI } from '../services/PostgreSQLAPI';
 
 interface MDNote {
-  id: string;
+  id: string; // 将数字ID转换为字符串以保持向后兼容
   title: string;
   content: string;
   folder: string;
@@ -36,148 +37,71 @@ const MDNoteManager = () => {
     newTag: ''
   });
 
-  // 初始化示例数据
-  useEffect(() => {
-    const sampleNotes: MDNote[] = [
-      {
-        id: '1',
-        title: 'AI工具对比分析',
-        content: `# AI工具对比分析
-
-## ChatGPT vs Claude vs Gemini
-
-### ChatGPT
-- **优势**: 生态系统完善，插件丰富
-- **劣势**: 有时会产生幻觉
-- **适用场景**: 日常对话、代码生成、创意写作
-
-### Claude
-- **优势**: 长文本处理能力强，逻辑清晰
-- **劣势**: 可用性有限制
-- **适用场景**: 文档分析、学术研究
-
-### Gemini
-- **优势**: 多模态能力强
-- **劣势**: 中文支持相对较弱
-- **适用场景**: 图像分析、多媒体处理
-
-## 总结
-每个AI工具都有其独特优势，选择时需要根据具体需求来决定。`,
-        folder: 'AI研究',
-        tags: ['AI', '对比', '工具'],
-        created_at: '2025-06-01',
-        updated_at: '2025-06-08'
-      },
-      {
-        id: '2',
-        title: '1PLab OS 项目规划',
-        content: `# 1PLab OS 项目规划
-
-## 项目概述
-一个人的实验室操作系统，专注于AI工具管理和知识管理。
-
-## 核心功能
-1. **AI工具管理**
-   - 订阅追踪
-   - 费用计算
-   - 到期提醒
-
-2. **Markdown笔记**
-   - 富文本编辑
-   - 文件夹管理
-   - 标签分类
-
-3. **数据可视化**
-   - 思维导图
-   - 关系图谱
-   - 统计图表
-
-## 技术栈
-- 前端: React + TypeScript + Tailwind CSS
-- 可视化: D3.js
-- 动画: Framer Motion
-
-## 开发计划
-- Phase 1: AI工具管理 ✅
-- Phase 2: Markdown笔记 🚧
-- Phase 3: 数据同步 📋`,
-        folder: '项目文档',
-        tags: ['项目', '规划', '开发'],
-        created_at: '2025-06-05',
-        updated_at: '2025-06-08'
-      },
-      {
-        id: '3',
-        title: 'React Hooks 学习笔记',
-        content: `# React Hooks 学习笔记
-
-## useState
-用于在函数组件中添加状态。
-
-\`\`\`javascript
-const [count, setCount] = useState(0);
-\`\`\`
-
-## useEffect
-用于处理副作用，如数据获取、订阅等。
-
-\`\`\`javascript
-useEffect(() => {
-  // 副作用逻辑
-  return () => {
-    // 清理函数
-  };
-}, [dependencies]);
-\`\`\`
-
-## useContext
-用于消费 Context 值。
-
-\`\`\`javascript
-const value = useContext(MyContext);
-\`\`\`
-
-## 自定义 Hooks
-可以封装可复用的状态逻辑。
-
-\`\`\`javascript
-function useCounter(initialValue = 0) {
-  const [count, setCount] = useState(initialValue);
-  const increment = () => setCount(count + 1);
-  const decrement = () => setCount(count - 1);
-  return { count, increment, decrement };
-}
-\`\`\``,
-        folder: '学习笔记',
-        tags: ['React', 'Hooks', '前端'],
-        created_at: '2025-06-03',
-        updated_at: '2025-06-07'
+  // 从数据库加载笔记
+  const loadNotes = async () => {
+    try {
+      const response = await postgresAPI.getMDNotes();
+      if (response.data) {
+        // 转换数字ID为字符串ID以保持向后兼容
+        const convertedNotes: MDNote[] = response.data.map(note => ({
+          ...note,
+          id: note.id.toString(),
+          folder: note.folder || '默认',
+          tags: note.tags || [],
+          created_at: note.created_at || new Date().toISOString().split('T')[0],
+          updated_at: note.updated_at || new Date().toISOString().split('T')[0]
+        }));
+        setNotes(convertedNotes);
+        
+        // 更新文件夹列表
+        const noteFolders = [...new Set(convertedNotes.map(note => note.folder))];
+        setFolders(prev => [...new Set([...prev, ...noteFolders])]);
+      } else {
+        console.error('加载笔记失败:', response.error);
+        // 如果数据库连接失败，尝试从localStorage加载
+        loadFromLocalStorage();
       }
-    ];
+    } catch (error) {
+      console.error('加载笔记时出错:', error);
+      loadFromLocalStorage();
+    }
+  };
 
-    // 从localStorage加载数据
+  // 从localStorage加载（备用方案）
+  const loadFromLocalStorage = () => {
     const savedNotes = localStorage.getItem('md-notes');
     if (savedNotes) {
-      setNotes(JSON.parse(savedNotes));
-    } else {
-      setNotes(sampleNotes);
-      localStorage.setItem('md-notes', JSON.stringify(sampleNotes));
+      try {
+        setNotes(JSON.parse(savedNotes));
+      } catch (error) {
+        console.error('解析保存的笔记失败:', error);
+        setNotes([]);
+      }
     }
-
+    
     // 加载文件夹
     const savedFolders = localStorage.getItem('md-folders');
     if (savedFolders) {
-      setFolders(JSON.parse(savedFolders));
+      try {
+        setFolders(JSON.parse(savedFolders));
+      } catch (error) {
+        console.error('解析保存的文件夹失败:', error);
+      }
     }
-  }, []);
+  };
 
-  // 保存到localStorage
-  const saveNotes = (newNotes: MDNote[]) => {
+  // 初始化数据加载
+  useEffect(() => {
+    loadNotes();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // localStorage备用保存函数
+  const saveNotesToLocalStorage = (newNotes: MDNote[]) => {
     setNotes(newNotes);
     localStorage.setItem('md-notes', JSON.stringify(newNotes));
   };
 
-  const saveFolders = (newFolders: string[]) => {
+  const saveFoldersToLocalStorage = (newFolders: string[]) => {
     setFolders(newFolders);
     localStorage.setItem('md-folders', JSON.stringify(newFolders));
   };
@@ -192,42 +116,119 @@ function useCounter(initialValue = 0) {
   });
 
   // 创建新笔记
-  const handleCreateNote = () => {
+  const handleCreateNote = async () => {
     if (!newNote.title.trim()) return;
 
-    const note: MDNote = {
-      id: Date.now().toString(),
-      title: newNote.title,
-      content: newNote.content,
-      folder: newNote.folder,
-      tags: newNote.tags,
-      created_at: new Date().toISOString().split('T')[0],
-      updated_at: new Date().toISOString().split('T')[0]
-    };
+    try {
+      const noteData = {
+        title: newNote.title,
+        content: newNote.content,
+        folder: newNote.folder,
+        tags: newNote.tags,
+      };
 
-    saveNotes([...notes, note]);
-    setNewNote({ title: '', content: '', folder: '默认', tags: [], newTag: '' });
-    setIsCreating(false);
+      const response = await postgresAPI.createMDNote(noteData);
+      if (response.data) {
+        // 重新加载笔记列表
+        await loadNotes();
+        setNewNote({ title: '', content: '', folder: '默认', tags: [], newTag: '' });
+        setIsCreating(false);
+      } else {
+        console.error('创建笔记失败:', response.error);
+        // 如果API失败，回退到localStorage
+        const note: MDNote = {
+          id: Date.now().toString(),
+          title: newNote.title,
+          content: newNote.content,
+          folder: newNote.folder,
+          tags: newNote.tags,
+          created_at: new Date().toISOString().split('T')[0],
+          updated_at: new Date().toISOString().split('T')[0]
+        };
+        saveNotesToLocalStorage([...notes, note]);
+        setNewNote({ title: '', content: '', folder: '默认', tags: [], newTag: '' });
+        setIsCreating(false);
+      }
+    } catch (error) {
+      console.error('创建笔记时出错:', error);
+      // 回退到localStorage
+      const note: MDNote = {
+        id: Date.now().toString(),
+        title: newNote.title,
+        content: newNote.content,
+        folder: newNote.folder,
+        tags: newNote.tags,
+        created_at: new Date().toISOString().split('T')[0],
+        updated_at: new Date().toISOString().split('T')[0]
+      };
+      saveNotesToLocalStorage([...notes, note]);
+      setNewNote({ title: '', content: '', folder: '默认', tags: [], newTag: '' });
+      setIsCreating(false);
+    }
   };
 
   // 删除笔记
-  const handleDeleteNote = (id: string) => {
-    if (confirm('确定要删除这篇笔记吗？')) {
-      saveNotes(notes.filter(note => note.id !== id));
+  const handleDeleteNote = async (id: string) => {
+    if (!confirm('确定要删除这篇笔记吗？')) return;
+
+    try {
+      const numericId = parseInt(id);
+      const response = await postgresAPI.deleteMDNote(numericId);
+      if (response.data) {
+        // 重新加载笔记列表
+        await loadNotes();
+      } else {
+        console.error('删除笔记失败:', response.error);
+        // 回退到localStorage
+        saveNotesToLocalStorage(notes.filter(note => note.id !== id));
+      }
+    } catch (error) {
+      console.error('删除笔记时出错:', error);
+      // 回退到localStorage
+      saveNotesToLocalStorage(notes.filter(note => note.id !== id));
     }
   };
 
   // 更新笔记
-  const handleUpdateNote = () => {
+  const handleUpdateNote = async () => {
     if (!editingNote) return;
 
-    const updatedNotes = notes.map(note =>
-      note.id === editingNote.id
-        ? { ...editingNote, updated_at: new Date().toISOString().split('T')[0] }
-        : note
-    );
-    saveNotes(updatedNotes);
-    setEditingNote(null);
+    try {
+      const numericId = parseInt(editingNote.id);
+      const updateData = {
+        title: editingNote.title,
+        content: editingNote.content,
+        folder: editingNote.folder,
+        tags: editingNote.tags,
+      };
+
+      const response = await postgresAPI.updateMDNote(numericId, updateData);
+      if (response.data) {
+        // 重新加载笔记列表
+        await loadNotes();
+        setEditingNote(null);
+      } else {
+        console.error('更新笔记失败:', response.error);
+        // 回退到localStorage
+        const updatedNotes = notes.map(note =>
+          note.id === editingNote.id
+            ? { ...editingNote, updated_at: new Date().toISOString().split('T')[0] }
+            : note
+        );
+        saveNotesToLocalStorage(updatedNotes);
+        setEditingNote(null);
+      }
+    } catch (error) {
+      console.error('更新笔记时出错:', error);
+      // 回退到localStorage
+      const updatedNotes = notes.map(note =>
+        note.id === editingNote.id
+          ? { ...editingNote, updated_at: new Date().toISOString().split('T')[0] }
+          : note
+      );
+      saveNotesToLocalStorage(updatedNotes);
+      setEditingNote(null);
+    }
   };
 
   // 添加标签
@@ -258,7 +259,7 @@ function useCounter(initialValue = 0) {
   const handleCreateFolder = () => {
     if (!newFolderName.trim() || folders.includes(newFolderName)) return;
     
-    saveFolders([...folders, newFolderName]);
+    saveFoldersToLocalStorage([...folders, newFolderName]);
     setNewFolderName('');
     setIsCreatingFolder(false);
   };

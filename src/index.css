@@ -572,3 +572,238 @@ html {
   .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* 闪灵组件专用样式 */
+.inspiration-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.inspiration-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.inspiration-card:hover::before {
+  left: 100%;
+}
+
+.shadow-glow {
+  box-shadow: 
+    0 0 20px rgba(189, 0, 255, 0.3),
+    0 0 40px rgba(189, 0, 255, 0.1),
+    0 0 60px rgba(189, 0, 255, 0.05);
+}
+
+.shadow-glow-sm {
+  box-shadow: 
+    0 0 10px rgba(189, 0, 255, 0.2),
+    0 0 20px rgba(189, 0, 255, 0.1);
+}
+
+/* 闪烁动画 */
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.1);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* 文本截断 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-6 {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 渐变边框动画 */
+@keyframes gradient-border {
+  0% {
+    border-color: rgba(0, 245, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+  }
+  33% {
+    border-color: rgba(189, 0, 255, 0.5);
+    box-shadow: 0 0 10px rgba(189, 0, 255, 0.3);
+  }
+  66% {
+    border-color: rgba(255, 20, 147, 0.5);
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.3);
+  }
+  100% {
+    border-color: rgba(0, 245, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+  }
+}
+
+.animate-gradient-border {
+  animation: gradient-border 3s ease-in-out infinite;
+}
+
+/* 自定义滚动条 */
+.inspiration-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.inspiration-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.inspiration-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #bd00ff, #ff1493);
+  border-radius: 2px;
+}
+
+.inspiration-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ff1493, #00f5ff);
+}
+
+/* 导航侧边栏增强样式 */
+.sidebar-nav-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s;
+}
+
+.sidebar-nav-button:hover::before {
+  left: 100%;
+}
+
+/* 导航图标增强效果 */
+.nav-icon {
+  transition: all 0.3s ease;
+}
+
+.nav-icon:hover {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* 侧边栏背景模糊效果 */
+.sidebar-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 用户头像光环效果 */
+.user-avatar {
+  position: relative;
+}
+
+.user-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #00f5ff, #bd00ff, #ff1493, #00f5ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.user-avatar:hover::after {
+  opacity: 0.7;
+}
+
+/* 在线状态脉冲效果 */
+.status-pulse {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 12px currentColor, 0 0 20px currentColor;
+  }
+}
+
+/* 导航项激活状态渐变 */
+.nav-active {
+  background: linear-gradient(135deg, 
+    rgba(0, 245, 255, 0.2) 0%,
+    rgba(189, 0, 255, 0.1) 50%,
+    rgba(255, 20, 147, 0.2) 100%
+  );
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 15px rgba(0, 245, 255, 0.2);
+}
+
+/* 登出按钮特殊效果 */
+.logout-button {
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, rgba(255, 59, 48, 0.2), rgba(255, 20, 147, 0.1));
+  border-color: rgba(255, 59, 48, 0.5);
+  box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+}
+
+/* 版本标签样式 */
+.version-badge {
+  background: linear-gradient(45deg, rgba(0, 245, 255, 0.1), rgba(189, 0, 255, 0.1));
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.version-badge:hover {
+  background: linear-gradient(45deg, rgba(0, 245, 255, 0.2), rgba(189, 0, 255, 0.2));
+  border-color: rgba(0, 245, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+}

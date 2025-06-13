@@ -1,9 +1,16 @@
-version: '3.8'
+version: '3'
 
 services:
+  # 前端服务 - 1PLAB_OS
   frontend:
     build: .
     container_name: 1plab-os-frontend
     ports:
       - "8080:80"
     restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

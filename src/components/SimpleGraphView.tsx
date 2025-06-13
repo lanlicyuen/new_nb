@@ -7,7 +7,7 @@ interface AITool {
   id: string;
   name: string;
   purchaseDate: string;
-  feeType: 'monthly' | 'yearly';
+  feeType: 'monthly' | 'yearly' | 'one-time';
   expirationDate: string;
   features: string[];
   cost?: number;

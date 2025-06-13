@@ -1,19 +1,21 @@
-// 集成版AI工具管理器组件
-import { useState, useEffect } from 'react';
+// 集成版AI工具管理器组件 - PostgreSQL版本
+import { useState, useEffect, useCallback } from 'react';
 import { Trash2, AlertTriangle, Calendar, DollarSign, Plus, Search, Filter, Clock, Tag, List, Network } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SimpleGraphView from './SimpleGraphView';
 import { DataDebugger } from './DataDebugger';
+import { postgresAPI } from '../services/PostgreSQLAPI';
 
-// 接口定义
+// 接口定义 - 扩展API类型以兼容前端需求
 interface AITool {
-  id: number;
+  id: string; // 将数字ID转换为字符串以保持向后兼容
   name: string;
   purchase_date: string;
-  fee_type: 'monthly' | 'yearly';
+  fee_type: 'monthly' | 'yearly' | 'one-time';
   fee_amount: number | null;
   features: string[];
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface ToolStats {
@@ -23,24 +25,7 @@ interface ToolStats {
   yearly_total: number;
 }
 
-interface NewToolData {
-  name: string;
-  purchase_date: string;
-  fee_type: 'monthly' | 'yearly';
-  fee_amount: number | null;
-  features: string[];
-}
-
-interface AIToolsManagerProps {
-  apiService: {
-    getAllTools: () => Promise<AITool[]>;
-    addTool: (tool: NewToolData) => Promise<AITool>;
-    deleteTool: (id: number) => Promise<void>;
-    getToolsStats: () => Promise<ToolStats>;
-  };
-}
-
-export function AIToolsManagerIntegrated({ apiService }: AIToolsManagerProps) {
+export function AIToolsManagerIntegrated() {
   const [tools, setTools] = useState<AITool[]>([]);
   const [stats, setStats] = useState<ToolStats>({
     total_tools: 0,
@@ -56,17 +41,86 @@ export function AIToolsManagerIntegrated({ apiService }: AIToolsManagerProps) {
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'expiration'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  // 从数据库加载工具
+  const loadTools = useCallback(async () => {
+    try {
+      const response = await postgresAPI.getAITools();
+      if (response.data) {
+        // 转换数字ID为字符串ID以保持向后兼容
+        const convertedTools: AITool[] = response.data.map(tool => ({
+          ...tool,
+          id: tool.id.toString()
+        }));
+        setTools(convertedTools);
+        
+        // 计算统计信息
+        const stats = convertedTools.reduce((acc, tool) => {
+          acc.total_tools++;
+          if (tool.fee_type === 'monthly') {
+            acc.monthly_tools++;
+            acc.yearly_total += (tool.fee_amount || 0) * 12;
+          } else {
+            acc.yearly_tools++;
+            acc.yearly_total += tool.fee_amount || 0;
+          }
+          return acc;
+        }, {
+          total_tools: 0,
+          monthly_tools: 0,
+          yearly_tools: 0,
+          yearly_total: 0
+        });
+        setStats(stats);
+      } else {
+        console.error('加载工具失败:', response.error);
+        // 如果数据库连接失败，尝试从localStorage加载
+        loadFromLocalStorage();
+      }
+    } catch (error) {
+      console.error('加载工具时出错:', error);
+      loadFromLocalStorage();
+    }
+  }, []);
+
+  // 从localStorage加载（备用方案）
+  const loadFromLocalStorage = () => {
+    const savedTools = localStorage.getItem('ai-tools');
+    if (savedTools) {
+      try {
+        const tools: AITool[] = JSON.parse(savedTools);
+        setTools(tools);
+        
+        // 计算统计信息
+        const stats = tools.reduce((acc, tool) => {
+          acc.total_tools++;
+          if (tool.fee_type === 'monthly') {
+            acc.monthly_tools++;
+            acc.yearly_total += (tool.fee_amount || 0) * 12;
+          } else {
+            acc.yearly_tools++;
+            acc.yearly_total += tool.fee_amount || 0;
+          }
+          return acc;
+        }, {
+          total_tools: 0,
+          monthly_tools: 0,
+          yearly_tools: 0,
+          yearly_total: 0
+        });
+        setStats(stats);
+      } catch (error) {
+        console.error('解析保存的工具失败:', error);
+        setTools([]);
+      }
+    }
+  };
+
   // 加载工具和统计信息
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [toolsData, statsData] = await Promise.all([
-          apiService.getAllTools(),
-          apiService.getToolsStats()
-        ]);
-        setTools(toolsData);
-        setStats(statsData);
+        await loadTools();
       } catch (error) {
         console.error("获取数据失败:", error);
       } finally {
@@ -75,67 +129,124 @@ export function AIToolsManagerIntegrated({ apiService }: AIToolsManagerProps) {
     };
 
     fetchData();
-  }, [apiService]);
+  }, [loadTools]);
 
   // 处理工具删除
-  const handleDeleteTool = async (id: number) => {
+  const handleDeleteTool = async (id: string) => {
     if (confirm('确定要删除这个工具吗？')) {
       try {
-        await apiService.deleteTool(id);
-        setTools(tools.filter(tool => tool.id !== id));
-        
-        // 更新统计信息
-        const deletedTool = tools.find(tool => tool.id === id);
-        if (deletedTool) {
-          setStats(prev => ({
-            ...prev,
-            total_tools: prev.total_tools - 1,
-            monthly_tools: deletedTool.fee_type === 'monthly' ? prev.monthly_tools - 1 : prev.monthly_tools,
-            yearly_tools: deletedTool.fee_type === 'yearly' ? prev.yearly_tools - 1 : prev.yearly_tools,
-            yearly_total: prev.yearly_total - (deletedTool.fee_type === 'monthly' ? 
-              (deletedTool.fee_amount || 0) * 12 : (deletedTool.fee_amount || 0))
-          }));
+        const numericId = parseInt(id);
+        const response = await postgresAPI.deleteAITool(numericId);
+        if (response.data) {
+          // 重新加载工具列表
+          await loadTools();
+        } else {
+          console.error('删除工具失败:', response.error);
+          // 回退到localStorage
+          const updatedTools = tools.filter(tool => tool.id !== id);
+          saveToolsToLocalStorage(updatedTools);
         }
       } catch (error) {
         console.error("删除工具失败:", error);
+        // 回退到localStorage
+        const updatedTools = tools.filter(tool => tool.id !== id);
+        saveToolsToLocalStorage(updatedTools);
       }
     }
   };
 
+  // localStorage备用保存函数
+  const saveToolsToLocalStorage = (newTools: AITool[]) => {
+    setTools(newTools);
+    localStorage.setItem('ai-tools', JSON.stringify(newTools));
+    
+    // 重新计算统计信息
+    const stats = newTools.reduce((acc, tool) => {
+      acc.total_tools++;
+      if (tool.fee_type === 'monthly') {
+        acc.monthly_tools++;
+        acc.yearly_total += (tool.fee_amount || 0) * 12;
+      } else {
+        acc.yearly_tools++;
+        acc.yearly_total += tool.fee_amount || 0;
+      }
+      return acc;
+    }, {
+      total_tools: 0,
+      monthly_tools: 0,
+      yearly_tools: 0,
+      yearly_total: 0
+    });
+    setStats(stats);
+  };
+
   // 处理添加新工具
-  const handleAddTool = async (newTool: Omit<AITool, 'id' | 'created_at'>) => {
+  const handleAddTool = async (newTool: {
+    name: string;
+    purchase_date: string;
+    fee_type: 'monthly' | 'yearly' | 'one-time';
+    fee_amount: number | null;
+    features: string[];
+  }) => {
     try {
-      const addedTool = await apiService.addTool(newTool);
-      setTools([...tools, addedTool]);
-      setShowAddForm(false);
-      
-      // 更新统计信息
-      setStats(prev => ({
-        ...prev,
-        total_tools: prev.total_tools + 1,
-        monthly_tools: newTool.fee_type === 'monthly' ? prev.monthly_tools + 1 : prev.monthly_tools,
-        yearly_tools: newTool.fee_type === 'yearly' ? prev.yearly_tools + 1 : prev.yearly_tools,
-        yearly_total: prev.yearly_total + (newTool.fee_type === 'monthly' ? 
-          (newTool.fee_amount || 0) * 12 : (newTool.fee_amount || 0))
-      }));
+      const response = await postgresAPI.createAITool(newTool);
+      if (response.data) {
+        // 重新加载工具列表
+        await loadTools();
+        setShowAddForm(false);
+      } else {
+        console.error('创建工具失败:', response.error);
+        // 回退到localStorage
+        const tool: AITool = {
+          id: Date.now().toString(),
+          name: newTool.name,
+          purchase_date: newTool.purchase_date,
+          fee_type: newTool.fee_type,
+          fee_amount: newTool.fee_amount,
+          features: newTool.features,
+          created_at: new Date().toISOString().split('T')[0],
+          updated_at: new Date().toISOString().split('T')[0]
+        };
+        saveToolsToLocalStorage([...tools, tool]);
+        setShowAddForm(false);
+      }
     } catch (error) {
       console.error("添加工具失败:", error);
+      // 回退到localStorage
+      const tool: AITool = {
+        id: Date.now().toString(),
+        name: newTool.name,
+        purchase_date: newTool.purchase_date,
+        fee_type: newTool.fee_type,
+        fee_amount: newTool.fee_amount,
+        features: newTool.features,
+        created_at: new Date().toISOString().split('T')[0],
+        updated_at: new Date().toISOString().split('T')[0]
+      };
+      saveToolsToLocalStorage([...tools, tool]);
+      setShowAddForm(false);
     }
   };
 
   // 计算到期日期
-  const calculateExpirationDate = (purchaseDate: string, feeType: 'monthly' | 'yearly'): string => {
+  const calculateExpirationDate = (purchaseDate: string, feeType: 'monthly' | 'yearly' | 'one-time'): string => {
     const date = new Date(purchaseDate);
     if (feeType === 'yearly') {
       date.setFullYear(date.getFullYear() + 1);
-    } else {
+    } else if (feeType === 'monthly') {
       date.setMonth(date.getMonth() + 1);
+    } else {
+      // one-time purchase doesn't expire
+      return '永久';
     }
     return date.toISOString().split('T')[0];
   };
 
   // 计算剩余天数
   const calculateDaysLeft = (expirationDate: string): number => {
+    if (expirationDate === '永久') {
+      return 999999; // 返回一个大数字表示永久
+    }
     const today = new Date();
     const expDate = new Date(expirationDate);
     const diffTime = expDate.getTime() - today.getTime();
@@ -465,8 +576,8 @@ const ToolCard = ({
   calculateDaysLeft
 }: { 
   tool: AITool; 
-  onDelete: (id: number) => void;
-  calculateExpirationDate: (purchaseDate: string, feeType: 'monthly' | 'yearly') => string;
+  onDelete: (id: string) => void;
+  calculateExpirationDate: (purchaseDate: string, feeType: 'monthly' | 'yearly' | 'one-time') => string;
   calculateDaysLeft: (expirationDate: string) => number;
 }) => {
   const expirationDate = calculateExpirationDate(tool.purchase_date, tool.fee_type);
@@ -672,6 +783,7 @@ const AddToolForm = ({ onAdd, onCancel }: {
               >
                 <option value="monthly">月付</option>
                 <option value="yearly">年付</option>
+                <option value="one-time">一次性付费</option>
               </select>
             </div>
             
