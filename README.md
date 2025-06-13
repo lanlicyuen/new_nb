@@ -1,17 +1,31 @@
-# 1PLAB OS - AI工具管理系统
+# 1PLAB OS - Next Generation AI Tools Management Platform
 
-<img src="https://img.shields.io/badge/Version-2.0-blue" alt="Version"> <img src="https://img.shields.io/badge/Database-PostgreSQL-blue" alt="Database"> <img src="https://img.shields.io/badge/Frontend-React-61DAFB" alt="Frontend"> <img src="https://img.shields.io/badge/Backend-Flask-000000" alt="Backend">
+<img src="https://img.shields.io/badge/Version-2.0.0-blue" alt="Version"> <img src="https://img.shields.io/badge/Database-PostgreSQL-blue" alt="Database"> <img src="https://img.shields.io/badge/Frontend-React%2018-61DAFB" alt="Frontend"> <img src="https://img.shields.io/badge/UI-Tailwind%20CSS-38B2AC" alt="UI"> <img src="https://img.shields.io/badge/Deploy-Docker-2496ED" alt="Deploy">
 
-一个集成的赛博朋克风格AI工具和Markdown笔记管理系统，现已升级为PostgreSQL数据库版本！
+🚀 **全新v2.0.0版本** - 一个完全重构的赛博朋克风格AI工具管理平台，带来革命性的用户界面和体验！
 
-## ✨ 特性
+## 🌟 v2.0.0 重大更新
 
-- 🤖 **AI工具管理** - 完整的CRUD操作，支持月费/年费/一次性费用
-- 📝 **Markdown笔记管理** - 支持文件夹分类和标签系统
-- 📊 **数据可视化** - 费用统计和图表展示
-- 🔄 **数据迁移** - 从localStorage无缝迁移到PostgreSQL
-- 🎨 **赛博朋克UI** - 现代化界面设计，支持深色主题
-- 💾 **企业级数据持久化** - PostgreSQL数据库支持
+### 🎨 全新界面设计
+- **320px宽侧边导航** - 清晰的功能分组和视觉层次
+- **Logo点击导航** - 直观的返回首页功能
+- **键盘快捷键** - Alt+1~4快速切换功能模块
+- **赛博朋克视觉** - 统一的未来科技美学
+
+### 🛠️ 重构的核心功能
+- **数据迁移工具** - 完全重写，提供详细的功能说明和安全保障
+- **智能工作流** - 优化的用户操作路径和状态管理
+- **动画系统** - Framer Motion驱动的流畅交互效果
+
+## ✨ 核心特性
+
+- 🤖 **AI工具管理** - 完整的CRUD操作，支持多种计费模式
+- 📝 **Markdown笔记** - 文件夹分类和标签系统
+- 💡 **闪灵模块** - 快速想法捕获和整理
+- 📊 **数据可视化** - 费用统计和交互式图表
+- 🔄 **数据迁移** - 安全的PostgreSQL迁移工具
+- 🎨 **现代UI/UX** - 玻璃形态效果和动态渐变
+- 💾 **企业级存储** - PostgreSQL数据库支持
 
 ## 🚀 快速开始
 
@@ -61,30 +75,75 @@ pip install -r backend/requirements.txt
 - 🔧 **后端API:** http://localhost:5001
 - 📊 **数据库:** PostgreSQL (localhost:5432)
 
-## 🛠 技术栈
+## 🛠 技术架构
 
-### 前端
-- **React 18** - 现代化UI框架
-- **TypeScript** - 类型安全的JavaScript
-- **Tailwind CSS** - 实用工具优先的CSS框架
-- **Framer Motion** - 动画库
-- **D3.js** - 数据可视化
-- **Vite** - 快速构建工具
+### 🎨 前端技术栈
+- **React 18** - 现代化Hooks和函数组件
+- **TypeScript** - 严格类型检查和智能提示
+- **Tailwind CSS** - 实用工具优先的样式系统
+- **Framer Motion** - 专业级动画和交互效果
+- **Lucide React** - 一致性图标库
+- **Vite** - 极速开发构建工具
 
-### 后端
+### 🔧 后端技术栈
 - **Flask** - 轻量级Python Web框架
-- **SQLAlchemy** - Python SQL工具包和ORM
-- **PostgreSQL** - 企业级关系型数据库
+- **SQLAlchemy** - 强大的Python ORM
+- **PostgreSQL 15+** - 企业级关系型数据库
 - **Flask-CORS** - 跨域资源共享支持
+
+### 🚀 部署技术
+- **Docker** - 容器化部署方案
+- **Nginx** - 高性能Web服务器
+- **Docker Compose** - 多容器编排工具
+
+## 🏗️ 系统架构
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │
+│   React Frontend│◄──►│   Flask API     │◄──►│  PostgreSQL DB  │
+│   (Port 5180)   │    │   (Port 5001)   │    │   (Port 5432)   │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                        │                        │
+         │                        │                        │
+    ┌──────────┐            ┌──────────┐            ┌──────────┐
+    │ Tailwind │            │   ORM    │            │  Tables  │
+    │   +      │            │SQLAlchemy│            │ai_tools  │
+    │ Framer   │            │          │            │md_notes  │
+    │ Motion   │            │          │            │   ...    │
+    └──────────┘            └──────────┘            └──────────┘
+```
 
 ## 📁 项目结构
 
 ```
-vs_web/
-├── src/                      # 前端源码
-│   ├── components/          # React组件
-│   ├── services/           # API服务
-│   └── types/              # TypeScript类型定义
+1PLab_OS/
+├── 🎨 前端 (React + TypeScript)
+│   ├── src/
+│   │   ├── components/          # 核心组件
+│   │   │   ├── AIToolsManager*  # AI工具管理模块
+│   │   │   ├── DataMigration*   # 数据迁移工具
+│   │   │   ├── MDNoteManager*   # Markdown笔记管理
+│   │   │   └── InspirationCapture* # 闪灵想法捕获
+│   │   ├── services/            # API服务层
+│   │   ├── types/               # TypeScript类型定义
+│   │   └── utils/               # 工具函数
+│   └── public/                  # 静态资源
+├── 🔧 后端 (Flask + PostgreSQL)
+│   ├── backend/
+│   │   ├── app.py              # Flask应用主文件
+│   │   └── requirements.txt    # Python依赖
+│   └── init-db.sql             # 数据库初始化脚本
+├── 🚀 部署配置
+│   ├── docker-compose.yml      # 容器编排配置
+│   ├── Dockerfile              # 容器构建文件
+│   ├── nginx.conf              # Web服务器配置
+│   └── deploy_package/         # 生产部署包
+└── 📋 文档
+    ├── README.md               # 项目说明
+    ├── SERVER_UPDATE_GUIDE.md  # 服务器更新指南
+    └── manual_deploy_*.md      # 部署文档
 ├── backend/                 # 后端源码
 │   ├── app.py              # Flask应用主文件
 │   └── requirements.txt    # Python依赖
